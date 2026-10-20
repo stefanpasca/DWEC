@@ -1,0 +1,17 @@
+body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center; 
+        align-items: center;     
+        font-family: 'Space Mono', monospace;
+      }
+      #tiempo {
+        border: 3px solid black;
+        padding: 20px 40px;
+        font-size: 48px;
+      }
+      div {
+        background-color: rgb(20, 20, 20);
+        color:aliceblue;
+    }
