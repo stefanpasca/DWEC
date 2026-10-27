@@ -1,0 +1,12 @@
+let cadena = "Numero de letras de esta cadena";
+let longitudCadena = cadena.length;
+let caracterCinco = cadena.charAt(5);
+let posicionLetraS = cadena.indexOf('s');
+let ultimaPosicionLetraE = cadena.lastIndexOf('e');
+let cadenaCambiada = cadena.replace('letras', 'caracteres');
+document.write("Cadena original: " + cadena + "<br>");
+document.write("Longitud de la cadena: " + longitudCadena + "<br>");
+document.write("Caracter en la posición 5: " + caracterCinco + "<br>");
+document.write("Posición de la letra 's': " + posicionLetraS + "<br>");
+document.write("Última posición de la letra 'e': " + ultimaPosicionLetraE + "<br>");
+document.write("Cadena cambiada: " + cadenaCambiada + "<br>");
