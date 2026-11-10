@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="Ej15.js"></script>
+    <p id="numeros"></p>
+    <p id="estrellas"></p>
+    <script>
+      let numeros = generarNumerosAleatorios(5, 50);
+      let estrellas = generarNumerosAleatorios(2, 12);
+      document.getElementById("numeros").textContent =
+        "Números: " + arrayATexto(numeros);
+      document.getElementById("estrellas").textContent =
+        "Estrellas: " + arrayATexto(estrellas);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="matriz"></div>
+  </body>
+  <script src="Ej14.js"></script>
+  <script>
+    let filas = 5;
+    let columnas = 10;
+    let divMatriz = document.getElementById("matriz");
+    let matriz = crearMatriz(filas, columnas);
+    divMatriz.innerHTML = mostrarMatriz(matriz);
+    divMatriz.innerHTML +=
+      "<br>" + mostrarPosicionConAmbasCoordenadas(matriz, filas, columnas);
+  </script>
+</html>
