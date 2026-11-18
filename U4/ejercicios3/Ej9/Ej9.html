@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="Ej9.js"></script>
+    <script>
+      let mkoi = [
+        new JugadorEsports("Top", "Myrwyn", "player1@example.com", 10),
+        new JugadorEsports("Jungle", "ElYoya", "player2@example.com", 12),
+        new JugadorEsports("Mid", "JojoPyun", "player3@example.com", 8),
+        new JugadorEsports("ADC", "Supa", "player4@example.com", 15),
+        new JugadorEsports("Support", "Alvaro", "player5@example.com", 9),
+      ];
+      alert(
+        "La media de horas entrenadas por el equipo es " +
+          mediaHorasPorEquipo(mkoi),
+      );
+    </script>
+  </body>
+</html>

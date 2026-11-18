@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const reservas = [
+        { id: 10000, precio: 25, habitacion: "individual", pagado: false },
+        { id: 10001, precio: 30, habitacion: "doble", pagado: true },
+        { id: 10002, precio: 50, habitacion: "suite", pagado: false },
+        { id: 10003, precio: 40, habitacion: "individual", pagado: true },
+      ];
+
+      const todasPagadas = reservas.every((reserva) => reserva.pagado);
+      console.log(todasPagadas);
+      const haySuite = reservas.some(
+        (reserva) => reserva.habitacion === "suite",
+      );
+      console.log(haySuite);
+      const noPagadas = reservas.filter((reserva) => !reserva.pagado);
+      console.log(noPagadas);
+      const reservasCaras = reservas.filter((reserva) => reserva.precio > 40);
+      console.log(reservasCaras);
+
+      const booking = reservas.find((b) => b.habitacion === "individual");
+      console.log(booking);
+      const bookingIndex = reservas.findIndex(
+        (b) => b.habitacion === "individual",
+      );
+      console.log(bookingIndex);
+
+      const descuento = 10;
+      const reservasConDescuento = reservas.map((reserva) => ({
+        price: reserva.precio * (1 - descuento / 100),
+      }));
+      console.log(reservasConDescuento);
+
+      const totalIngresos = reservas.reduce((total, reserva) => {
+        return total + reserva.precio;
+      }, 0);
+      console.log(totalIngresos);
+
+      const reservaNueva = { id: 10004, precio: 350 };
+      const resevaUnica = new Set(reservas);
+      resevaUnica.add(reservaNueva);
+      resevaUnica.add(reservaNueva);
+      console.log(resevaUnica);
+    </script>
+  </body>
+</html>

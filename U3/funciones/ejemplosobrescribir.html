@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function multiplicar(a, b = 100) {
+        return a * b;
+      }
+
+      console.log(multiplicar(5)); // Usará el valor por defecto de b (100)
+      console.log(multiplicar(5, 2)); // Sobrescribe el valor por defecto de b (100) con 2
+    </script>
+  </body>
+</html>

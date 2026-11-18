@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test DWEC · JavaScript</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --ink: #1d2330; --muted: #667085; --line: #e3e6eb;
+    --accent: #3456c9; --accent-soft: #e9eefc;
+    --ok: #1e7e46; --ok-soft: #e5f4ea; --bad: #b42318; --bad-soft: #fdecea;
+    --code-bg: #f3f4f7; --code-ink: #23272f;
+    --k: #8a3ab9; --s: #0f7b4a; --n: #b45309; --c: #8a94a6; --f: #2457c5;
+    --radius: 12px; --on-accent: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --card: #1a1e26; --ink: #e6e8ec; --muted: #9aa3b2; --line: #2c323d;
+      --accent: #7f9cff; --accent-soft: #232c45;
+      --ok: #5cc98a; --ok-soft: #173023; --bad: #ff8a80; --bad-soft: #3a1d1b;
+      --code-bg: #0f1217; --code-ink: #dfe3ea;
+      --on-accent: #0d1424; --k: #d49cff; --s: #7ddba5; --n: #f5b062; --c: #6b7385; --f: #8fb3ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 18px; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .hidden { display: none !important; }
+  label.opt-line { display: block; margin: 6px 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .chip { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 14px; cursor: pointer; user-select: none; }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .chip small { color: var(--muted); margin-left: 4px; }
+  .btn { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 10px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.link { border: none; background: none; color: var(--accent); padding: 6px 4px; font-weight: 500; }
+  select { font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { border: none; background: var(--card); color: var(--ink); padding: 8px 14px; font: inherit; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+  .field { margin-bottom: 18px; }
+  .field > .lbl { font-weight: 600; margin-bottom: 8px; display: block; }
+  .hint { color: var(--muted); font-size: 14px; }
+
+  /* Quiz */
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .progress { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 16px; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+  .timer { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .qhead { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; }
+  .qnum { font-weight: 700; }
+  .tag { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
+  .enun { margin: 0 0 12px; }
+  pre.code { background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 14px 16px; overflow-x: auto; font: 13.5px/1.55 ui-monospace, "Cascadia Code", Consolas, Menlo, monospace; margin: 0 0 16px; }
+  .tk-k { color: var(--k); } .tk-s { color: var(--s); } .tk-n { color: var(--n); } .tk-c { color: var(--c); font-style: italic; } .tk-f { color: var(--f); }
+  .opts { display: grid; gap: 8px; }
+  .opt { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 10px 12px; cursor: pointer; font: inherit; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); }
+  .opt .letter { font-weight: 700; color: var(--muted); }
+  .opt .txt { white-space: pre-wrap; font: 14px/1.5 ui-monospace, "Cascadia Code", Consolas, Menlo, monospace; overflow-wrap: anywhere; }
+  .opt .txt.prose { font: inherit; }
+  .opt.sel { border-color: var(--accent); background: var(--accent-soft); }
+  .opt.sel .letter { color: var(--accent); }
+  .opt.right { border-color: var(--ok); background: var(--ok-soft); }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+  .opt:disabled { cursor: default; }
+  .feedback { margin-top: 14px; border-radius: 10px; padding: 12px 14px; border: 1px solid var(--line); background: var(--accent-soft); }
+  .feedback b.ok { color: var(--ok); } .feedback b.bad { color: var(--bad); }
+  .navq { display: flex; justify-content: space-between; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .grid button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+  .grid button.ans { background: var(--accent-soft); border-color: var(--accent); }
+  .grid button.cur { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .grid button.r { background: var(--ok-soft); border-color: var(--ok); }
+  .grid button.w { background: var(--bad-soft); border-color: var(--bad); }
+
+  /* Results */
+  table.sum { width: 100%; border-collapse: collapse; }
+  table.sum th, table.sum td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.sum th { width: 34%; color: var(--muted); font-weight: 600; }
+  .big { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+  .bars { display: grid; gap: 8px; }
+  .bar { display: grid; grid-template-columns: minmax(120px, 210px) 1fr 52px; gap: 10px; align-items: center; font-size: 14px; }
+  .bar .track { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--accent); }
+  .status-ok { color: var(--ok); font-weight: 700; } .status-bad { color: var(--bad); font-weight: 700; } .status-none { color: var(--muted); font-weight: 700; }
+  .review .card { padding: 16px; }
+  .hist { font-size: 14px; color: var(--muted); }
+  kbd { font: 12px ui-monospace, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+  @media (max-width: 560px) {
+    .bar { grid-template-columns: 1fr 52px; } .bar .track { grid-column: 1 / -1; grid-row: 2; }
+    pre.code { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ─────────── Inicio ─────────── -->
+  <section id="vInicio">
+    <h1>Test de JavaScript · DWEC</h1>
+    <p class="sub">Preguntas tipo test aleatorias de la UD2 y la UD3: variables, tipos, bucles, strings, arrays, Math, Date, JSON, Map/Set, promesas y objetos del navegador.</p>
+
+    <div class="card">
+      <div class="field">
+        <span class="lbl">Número de preguntas</span>
+        <div class="row">
+          <select id="selNum">
+            <option value="6">6 (como el cuestionario de clase)</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="0">Todas</option>
+          </select>
+          <span class="hint" id="disp"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Modo</span>
+        <div class="seg" id="segModo">
+          <button data-m="examen" aria-pressed="true">Examen</button>
+          <button data-m="practica" aria-pressed="false">Práctica</button>
+        </div>
+        <p class="hint" id="modoHint" style="margin:8px 0 0"></p>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Temas</span>
+        <div class="row" id="temas"></div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn link" id="todos">Marcar todos</button>
+          <button class="btn link" id="ninguno">Desmarcar todos</button>
+        </div>
+      </div>
+
+      <button class="btn primary" id="btnEmpezar">Comenzar intento</button>
+    </div>
+
+    <div class="card hidden" id="histCard">
+      <h2>Últimos intentos</h2>
+      <div class="hist" id="hist"></div>
+    </div>
+  </section>
+
+  <!-- ─────────── Test ─────────── -->
+  <section id="vTest" class="hidden">
+    <div class="topbar">
+      <strong id="lblProg"></strong>
+      <span class="timer" id="timer">00:00</span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+
+    <div class="card" id="qCard"></div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <span class="hint">Navegación · <kbd>A</kbd>–<kbd>F</kbd> para responder, <kbd>←</kbd> <kbd>→</kbd> para moverte</span>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="row" style="margin-top:14px;justify-content:flex-end">
+        <button class="btn primary" id="btnTerminar">Terminar intento</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── Resultado ─────────── -->
+  <section id="vRes" class="hidden">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:12px">
+        <div>
+          <div class="hint">Nota</div>
+          <div class="big" id="notaBig"></div>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnFallos">Repetir las falladas</button>
+          <button class="btn primary" id="btnOtra">Nuevo intento</button>
+        </div>
+      </div>
+      <table class="sum" id="tblSum"></table>
+    </div>
+
+    <div class="card">
+      <h2>Por temas</h2>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <h2 style="margin:24px 0 12px">Revisión</h2>
+    <div class="review" id="review"></div>
+    <div class="row" style="justify-content:center;margin-top:8px">
+      <button class="btn" id="btnInicio">Volver al inicio</button>
+    </div>
+  </section>
+</div>
+
+<script src="preguntas.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const LET = "abcdef";
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("testdwec_" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("testdwec_" + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ── Utilidades ──
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const fmtN = n => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pad = n => String(n).padStart(2, "0");
+  const fmtDur = ms => { const s = Math.round(ms / 1000), m = Math.floor(s / 60); return m ? `${m} minuto${m === 1 ? "" : "s"} ${s % 60} segundo${s % 60 === 1 ? "" : "s"}` : `${s} segundo${s === 1 ? "" : "s"}`; };
+  const fmtFecha = d => d.toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const KW = new Set("let const var function return if else for while do switch case default break continue new typeof of in this class true false null undefined NaN Infinity".split(" "));
+  function hl(code) {
+    const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)(?=\s*\()|([A-Za-z_$][\w$]*)/g;
+    let out = "", last = 0, m;
+    while ((m = re.exec(code))) {
+      out += esc(code.slice(last, m.index));
+      const [t, com, str, num, fn, id] = m;
+      if (com) out += `<span class="tk-c">${esc(t)}</span>`;
+      else if (str) out += `<span class="tk-s">${esc(t)}</span>`;
+      else if (num) out += `<span class="tk-n">${t}</span>`;
+      else if (fn) out += KW.has(fn) ? `<span class="tk-k">${fn}</span>` : `<span class="tk-f">${fn}</span>`;
+      else out += KW.has(id) ? `<span class="tk-k">${id}</span>` : esc(id);
+      last = m.index + t.length;
+    }
+    return out + esc(code.slice(last));
+  }
+  const isProse = q => !q.c || q.o.every(o => !o.includes("\n") && /[a-záéíóúñ]{4,} [a-záéíóúñ]{2,} [a-záéíóúñ]{2,}/i.test(o));
+
+  // ── Configuración ──
+  const temas = [...new Set(PREGUNTAS.map(q => q.t))];
+  let selTemas = new Set(store.get("temas", temas).filter(t => temas.includes(t)));
+  if (!selTemas.size) selTemas = new Set(temas);
+  let modo = store.get("modo", "examen");
+  const numGuardado = store.get("num", "10");
+  if ([...$("selNum").options].some(o => o.value === numGuardado)) $("selNum").value = numGuardado;
+
+  function pintarTemas() {
+    $("temas").innerHTML = temas.map(t => {
+      const n = PREGUNTAS.filter(q => q.t === t).length;
+      return `<button class="chip" data-t="${esc(t)}" aria-pressed="${selTemas.has(t)}">${esc(t)}<small>${n}</small></button>`;
+    }).join("");
+    const disp = PREGUNTAS.filter(q => selTemas.has(q.t)).length;
+    $("disp").textContent = `${disp} disponibles de ${PREGUNTAS.length}`;
+    $("btnEmpezar").disabled = disp === 0;
+    store.set("temas", [...selTemas]);
+  }
+  function pintarModo() {
+    document.querySelectorAll("#segModo button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === modo));
+    $("modoHint").textContent = modo === "examen"
+      ? "Respondes todo y ves la corrección al terminar, como en el cuestionario de clase."
+      : "Ves si has acertado y la explicación nada más responder cada pregunta.";
+    store.set("modo", modo);
+  }
+  $("temas").onclick = e => { const b = e.target.closest(".chip"); if (!b) return; const t = b.dataset.t; selTemas.has(t) ? selTemas.delete(t) : selTemas.add(t); pintarTemas(); };
+  $("todos").onclick = () => { selTemas = new Set(temas); pintarTemas(); };
+  $("ninguno").onclick = () => { selTemas.clear(); pintarTemas(); };
+  $("segModo").onclick = e => { const b = e.target.closest("button"); if (b) { modo = b.dataset.m; pintarModo(); } };
+  $("selNum").onchange = () => store.set("num", $("selNum").value);
+
+  // ── Estado del intento ──
+  let S = null, tick = null;
+
+  function nuevoIntento(pool) {
+    const num = +$("selNum").value;
+    let qs = shuffle(pool);
+    if (num && !pool.fromFails) qs = qs.slice(0, num);
+    S = {
+      qs: qs.map(q => {
+        const idx = shuffle(q.o.map((_, i) => i));
+        return { q, orden: idx, correcta: idx.indexOf(q.r), resp: null };
+      }),
+      i: 0, inicio: new Date(), modo
+    };
+    mostrar("vTest");
+    clearInterval(tick);
+    tick = setInterval(() => { const s = Math.floor((Date.now() - S.inicio) / 1000); $("timer").textContent = `${pad(Math.floor(s / 60))}:${pad(s % 60)}`; }, 500);
+    $("timer").textContent = "00:00";
+    pintarPregunta();
+  }
+  $("btnEmpezar").onclick = () => nuevoIntento(PREGUNTAS.filter(q => selTemas.has(q.t)));
+
+  function mostrar(v) { ["vInicio", "vTest", "vRes"].forEach(id => $(id).classList.toggle("hidden", id !== v)); window.scrollTo(0, 0); }
+
+  function pintarPregunta() {
+    const it = S.qs[S.i], q = it.q, total = S.qs.length;
+    const contestada = it.resp !== null, corregir = S.modo === "practica" && contestada;
+    const prose = isProse(q);
+    $("lblProg").textContent = `Pregunta ${S.i + 1} de ${total}`;
+    $("bar").style.width = (S.qs.filter(x => x.resp !== null).length / total * 100) + "%";
+    let html = `<div class="qhead"><span class="qnum">Pregunta ${S.i + 1}</span><span class="tag">${esc(q.t)}</span></div>
+      <p class="enun">${esc(q.e)}</p>`;
+    if (q.c) html += `<pre class="code">${hl(q.c)}</pre>`;
+    html += `<div class="opts" role="radiogroup">`;
+    it.orden.forEach((oi, k) => {
+      let cls = "opt";
+      if (it.resp === k) cls += " sel";
+      if (corregir) { if (k === it.correcta) cls += " right"; else if (it.resp === k) cls += " wrong"; }
+      html += `<button class="${cls}" data-k="${k}" role="radio" aria-checked="${it.resp === k}" ${corregir ? "disabled" : ""}>
+        <span class="letter">${LET[k]}.</span><span class="txt${prose ? " prose" : ""}">${esc(q.o[oi])}</span></button>`;
+    });
+    html += `</div>`;
+    if (corregir) {
+      const ok = it.resp === it.correcta;
+      html += `<div class="feedback"><b class="${ok ? "ok" : "bad"}">${ok ? "Respuesta correcta." : "Respuesta incorrecta."}</b> ${esc(q.x)}</div>`;
+    }
+    html += `<div class="navq">
+      <button class="btn" id="prev" ${S.i === 0 ? "disabled" : ""}>← Anterior</button>
+      ${S.i < total - 1 ? `<button class="btn primary" id="next">Siguiente →</button>` : `<button class="btn primary" id="fin2">Terminar intento</button>`}
+    </div>`;
+    $("qCard").innerHTML = html;
+    $("qCard").querySelector(".opts").onclick = e => { const b = e.target.closest(".opt"); if (b && !b.disabled) responder(+b.dataset.k); };
+    $("prev").onclick = () => ir(S.i - 1);
+    if ($("next")) $("next").onclick = () => ir(S.i + 1);
+    if ($("fin2")) $("fin2").onclick = terminar;
+    pintarGrid();
+  }
+  function pintarGrid() {
+    $("grid").innerHTML = S.qs.map((it, k) => {
+      let c = "";
+      if (it.resp !== null) c = S.modo === "practica" ? (it.resp === it.correcta ? "r" : "w") : "ans";
+      if (k === S.i) c += " cur";
+      return `<button class="${c}" data-k="${k}" aria-label="Pregunta ${k + 1}">${k + 1}</button>`;
+    }).join("");
+  }
+  $("grid").onclick = e => { const b = e.target.closest("button"); if (b) ir(+b.dataset.k); };
+  function ir(k) { if (k >= 0 && k < S.qs.length) { S.i = k; pintarPregunta(); } }
+  function responder(k) {
+    const it = S.qs[S.i];
+    if (S.modo === "practica" && it.resp !== null) return;
+    it.resp = it.resp === k && S.modo === "examen" ? null : k;
+    pintarPregunta();
+  }
+  $("btnTerminar").onclick = terminar;
+
+  document.addEventListener("keydown", e => {
+    if ($("vTest").classList.contains("hidden") || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = LET.indexOf(e.key.toLowerCase());
+    if (k >= 0 && k < S.qs[S.i].orden.length) responder(k);
+    else if (e.key === "ArrowRight") ir(S.i + 1);
+    else if (e.key === "ArrowLeft") ir(S.i - 1);
+  });
+
+  function terminar() {
+    const sin = S.qs.filter(x => x.resp === null).length;
+    if (sin && !confirm(`Tienes ${sin} pregunta${sin > 1 ? "s" : ""} sin responder. ¿Terminar el intento igualmente?`)) return;
+    clearInterval(tick);
+    S.fin = new Date();
+    resultados();
+  }
+
+  function resultados() {
+    const total = S.qs.length;
+    const ok = S.qs.filter(x => x.resp === x.correcta).length;
+    const pct = ok / total * 100;
+    const nota10 = ok / total * 10;
+    $("notaBig").textContent = fmtN(nota10).replace(/,00$/, "") + " / 10";
+    $("notaBig").style.color = nota10 >= 5 ? "var(--ok)" : "var(--bad)";
+    $("tblSum").innerHTML = [
+      ["Estado", "Finalizado"],
+      ["Comenzado", fmtFecha(S.inicio)],
+      ["Completado", fmtFecha(S.fin)],
+      ["Duración", fmtDur(S.fin - S.inicio)],
+      ["Calificación", `${fmtN(ok)} de ${fmtN(total)} (${fmtN(pct)}%)`],
+      ["Modo", S.modo === "examen" ? "Examen" : "Práctica"]
+    ].map(([a, b]) => `<tr><th>${a}</th><td>${b}</td></tr>`).join("");
+
+    const porTema = {};
+    S.qs.forEach(x => { const t = x.q.t; porTema[t] ??= [0, 0]; porTema[t][1]++; if (x.resp === x.correcta) porTema[t][0]++; });
+    $("bars").innerHTML = Object.entries(porTema).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [a, n]]) =>
+      `<div class="bar"><span>${esc(t)}</span><div class="track"><div class="fill" style="width:${a / n * 100}%;background:${a / n >= .5 ? "var(--ok)" : "var(--bad)"}"></div></div><span style="text-align:right">${a}/${n}</span></div>`).join("");
+
+    $("review").innerHTML = S.qs.map((x, k) => {
+      const q = x.q, prose = isProse(q);
+      const est = x.resp === null ? ["Sin responder", "status-none"] : x.resp === x.correcta ? ["Correcta", "status-ok"] : ["Incorrecta", "status-bad"];
+      let h = `<div class="card"><div class="qhead"><span class="qnum">Pregunta ${k + 1} · <span class="${est[1]}">${est[0]}</span></span><span class="tag">${esc(q.t)}</span></div>
+        <div class="hint" style="margin-bottom:8px">Se puntúa ${x.resp === x.correcta ? "1,00" : "0,00"} sobre 1,00</div>
+        <p class="enun">${esc(q.e)}</p>${q.c ? `<pre class="code">${hl(q.c)}</pre>` : ""}<div class="opts">`;
+      x.orden.forEach((oi, j) => {
+        let cls = "opt";
+        if (j === x.correcta) cls += " right"; else if (j === x.resp) cls += " wrong";
+        h += `<button class="${cls}" disabled><span class="letter">${LET[j]}.</span><span class="txt${prose ? " prose" : ""}">${esc(q.o[oi])}</span></button>`;
+      });
+      h += `</div><div class="feedback"><b>Explicación:</b> ${esc(q.x)}<br><br><b>La respuesta correcta es:</b> <span style="white-space:pre-wrap">${esc(q.o[q.r])}</span></div></div>`;
+      return h;
+    }).join("");
+
+    const fallos = S.qs.filter(x => x.resp !== x.correcta).map(x => x.q);
+    $("btnFallos").disabled = !fallos.length;
+    $("btnFallos").onclick = () => { const p = fallos.slice(); p.fromFails = true; modo = S.modo; nuevoIntento(p); };
+
+    const hist = store.get("hist", []);
+    hist.unshift({ f: S.fin.toISOString(), ok, total, modo: S.modo });
+    store.set("hist", hist.slice(0, 10));
+    mostrar("vRes");
+  }
+  $("btnOtra").onclick = () => nuevoIntento(PREGUNTAS.filter(q => selTemas.has(q.t)));
+  $("btnInicio").onclick = () => { pintarHist(); mostrar("vInicio"); };
+
+  function pintarHist() {
+    const h = store.get("hist", []);
+    $("histCard").classList.toggle("hidden", !h.length);
+    $("hist").innerHTML = h.map(x => `${new Date(x.f).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${x.ok}/${x.total} · <b>${fmtN(x.ok / x.total * 10)}</b> · ${x.modo === "examen" ? "Examen" : "Práctica"}`).join("<br>");
+  }
+
+  pintarTemas(); pintarModo(); pintarHist();
+})();
+</script>
+</body>
+</html>
